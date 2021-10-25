@@ -1,0 +1,4 @@
+# Rule to autosuspend SCSI disks
+{% if kernel_udev_autosuspend_scsi_devices is defined %}
+SUBSYSTEM=="scsi", DRIVER=="sd", ATTR{power/control}="auto"
+{% endif %}

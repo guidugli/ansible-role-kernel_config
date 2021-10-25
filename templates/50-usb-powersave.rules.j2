@@ -1,0 +1,10 @@
+# whitelist for usb autosuspend/wakeup
+{% if kernel_udev_usb_autosuspend_devices is defined %}
+{% for entry in kernel_udev_usb_autosuspend_devices %}
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{idVendor}=="{{ entry.vendor }}", ATTR{idProduct}=="{{ entry.product }}", ATTR{power/control}="auto"
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{idVendor}=="{{ entry.vendor }}", ATTR{idProduct}=="{{ entry.product }}", ATTR{power/wakeup}="enabled"
+{% if entry.autosuspend is defined and (entry.autosuspend | int > 0) %}
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{idVendor}=="{{ entry.vendor }}", ATTR{idProduct}=="{{ entry.product }}", ATTR{power/autosuspend}="{{ entry.autosuspend }}"
+{% endif %}
+{% endfor %}
+{% endif %}

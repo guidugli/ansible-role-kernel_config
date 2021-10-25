@@ -1,0 +1,4 @@
+# whitelist for pci autosuspend
+{% for entry in kernel_udev_pci_autosuspend_devices | default([]) %}
+SUBSYSTEM=="pci", ATTR{vendor}=="{{ entry.vendor }}", ATTR{device}=="{{ entry.device }}", ATTR{power/control}="auto"
+{% endfor %}

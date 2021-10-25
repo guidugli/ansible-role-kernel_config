@@ -1,0 +1,4 @@
+# Set sata link power management policy
+{% if kernel_udev_sata_link_power_mgmt is defined %}
+ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="{{ kernel_udev_sata_link_power_mgmt }}"
+{% endif %}

@@ -1,0 +1,5 @@
+{% if kernel_udev_enable_wlan_powersave is defined and kernel_udev_enable_wlan_powersave %}
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="wl*", RUN+="/usr/sbin/iw dev $name set power_save on"
+{% else %}
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="wl*", RUN+="/usr/sbin/iw dev $name set power_save off"
+{% endif %}

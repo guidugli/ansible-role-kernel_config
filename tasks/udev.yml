@@ -1,0 +1,19 @@
+---
+
+- name: Ensure udev power saving rules are set
+  template:
+    src: "{{ item }}.rules.j2"
+    dest: "/etc/udev/rules.d/{{ item }}.rules"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - 90-sata-link-pm
+    - 50-bluetooth
+    - 50-usb-powersave
+    - 81-wifi-powersave
+    - 81-wol
+    - 90-pci-autosuspend
+    - 90-ahci-ata-autosuspend
+    - 90-scsi-autosuspend
+  notify: reload udev

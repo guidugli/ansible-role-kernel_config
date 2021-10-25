@@ -1,0 +1,5 @@
+# Rule to autosuspend AHCI controllers and attached ATA devices
+{% if kernel_udev_autosuspend_ahci_devices is defined %}
+SUBSYSTEM=="pci", DRIVER=="ahci", ATTR{power/control}="auto"
+SUBSYSTEMS=="pci", DRIVERS=="ahci", KERNEL=="ata*", ATTR{power/control}="auto"
+{% endif %}

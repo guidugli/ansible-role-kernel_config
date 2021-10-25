@@ -1,0 +1,17 @@
+---
+# vars file for kernel_config
+
+kernel_udev_reload_cmd: "udevadm control --reload-rules && udevadm trigger"
+
+_kernel_procps_packages:
+  default: ['procps']
+  RedHat: ['procps-ng']
+  CentOS: ['procps-ng']
+  Fedora: ['procps-ng']
+  Archlinux: ['procps-ng']
+
+kernel_procps_packages: "{{ _kernel_procps_packages[ansible_distribution ~'-'~ ansible_distribution_major_version] |
+                        default(_kernel_procps_packages[ansible_distribution]) |
+                        default(_kernel_procps_packages['default']) }}"
+
+_container_types: ['docker', 'podman', 'lxc', 'containerd']

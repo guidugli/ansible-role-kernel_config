@@ -1,0 +1,28 @@
+---
+# handlers file for sysctl
+
+- name: flush network routes
+  sysctl:
+    name: "{{ item }}"
+    value: "1"
+    reload: yes
+    state: present
+    sysctl_set: yes
+  loop:
+    - net.ipv4.route.flush
+    - net.ipv6.route.flush
+  when:
+    - kernel_sysctl_flush_network_routes
+    - ansible_virtualization_type not in _container_types
+
+- name: reload modules
+  systemd:
+    name: systemd-modules-load.service
+    state: restarted
+  when:
+    - ansible_service_mgr == 'systemd'
+    - ansible_virtualization_type not in _container_types
+
+- name: reload udev
+  command: "{{ kernel_udev_reload_cmd }}"
+  when: ansible_virtualization_type not in _container_types
