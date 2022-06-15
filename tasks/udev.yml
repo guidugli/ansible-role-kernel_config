@@ -1,7 +1,7 @@
 ---
 
 - name: Ensure udev power saving rules are set
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.rules.j2"
     dest: "/etc/udev/rules.d/{{ item }}.rules"
     owner: root

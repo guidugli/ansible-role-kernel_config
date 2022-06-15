@@ -14,4 +14,4 @@ kernel_procps_packages: "{{ _kernel_procps_packages[ansible_distribution ~'-'~ a
                         default(_kernel_procps_packages[ansible_distribution]) |
                         default(_kernel_procps_packages['default']) }}"
 
-_container_types: ['docker', 'podman', 'lxc', 'containerd']
+_container_types: ['docker', 'podman', 'lxc', 'containerd', 'container']

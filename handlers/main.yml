@@ -2,7 +2,7 @@
 # handlers file for sysctl
 
 - name: flush network routes
-  sysctl:
+  ansible.builtin.sysctl:
     name: "{{ item }}"
     value: "1"
     reload: yes
@@ -16,7 +16,7 @@
     - ansible_virtualization_type not in _container_types
 
 - name: reload modules
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-modules-load.service
     state: restarted
   when:
@@ -24,5 +24,5 @@
     - ansible_virtualization_type not in _container_types
 
 - name: reload udev
-  command: "{{ kernel_udev_reload_cmd }}"
+  ansible.builtin.command: "{{ kernel_udev_reload_cmd }}"
   when: ansible_virtualization_type not in _container_types

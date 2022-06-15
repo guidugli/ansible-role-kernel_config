@@ -2,10 +2,10 @@
 # tasks file for sysctl
 
 - name: Validate provided variables and set os dependent variables
-  import_tasks: asserts.yml
+  ansible.builtin.import_tasks: asserts.yml
 
 - name: Add files on /etc/modprobe.d to disable modules
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/modprobe.d/{{ item }}-disabled.conf"
     regexp: '^\s*install\s+{{ item }}\s+/bin/true'
     line: "install {{ item }} /bin/true"
@@ -18,7 +18,7 @@
   notify: reload modules
 
 - name: Add files on /etc/modprobe.d to blacklist modules
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/modprobe.d/{{ item }}-blacklist.conf"
     regexp: '^\s*blacklist\s+{{ item }}'
     line: "blacklist {{ item }}"
@@ -31,7 +31,7 @@
   notify: reload modules
 
 - name: Add files on /etc/modules-load.d to autostart modules
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/etc/modules-load.d/{{ item }}.conf"
     regexp: '^\s*{{ item }}'
     line: "{{ item }}"
@@ -44,28 +44,28 @@
   notify: reload modules
 
 - name: Install sysctl package (apt package manager)
-  apt:
+  ansible.builtin.apt:
     name: "{{ kernel_procps_packages }}"
     update_cache: true
     cache_valid_time: 3600
   when: ansible_pkg_mgr == "apt"
 
 - name: Install sysctl package (yum/dnf package manager)
-  yum:
+  ansible.builtin.yum:
     state: latest
     name: "{{ kernel_procps_packages }}"
   when: ansible_pkg_mgr in ['yum', 'dnf']
 
 
 - name: Force module reload before running sysctl
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
   # Most items are related to network, so call notify flush
   # network routes in case of any change. Maybe in the future
   # split this into two tasks, one for network keys and other
   # for non-network keys.
 - name: Checking sysctl configuration
-  sysctl:
+  ansible.builtin.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
@@ -76,4 +76,4 @@
   notify: flush network routes
 
 - name: Perform udev operations
-  import_tasks: udev.yml
+  ansible.builtin.import_tasks: udev.yml

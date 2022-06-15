@@ -3,26 +3,26 @@
 # Do not stop execution if a module do not exist but
 # show an error message.
 - name: Check if kernel modules to be disabled exist on the system.
-  command: "/usr/sbin/modinfo {{ item }}"
+  ansible.builtin.command: "/usr/sbin/modinfo {{ item }}"
   changed_when: false
   ignore_errors: yes
   loop: "{{ kernel_disable_modules | default([], true) }}"
 
 - name: Check if kernel modules to be blacklisted exist on the system.
-  command: "/usr/sbin/modinfo {{ item }}"
+  ansible.builtin.command: "/usr/sbin/modinfo {{ item }}"
   changed_when: false
   ignore_errors: yes
   loop: "{{ kernel_blacklist_modules | default([], true) }}"
 
 - name: Check if kernel modules to be auto started exist on the system.
-  command: "/usr/sbin/modinfo {{ item }}"
+  ansible.builtin.command: "/usr/sbin/modinfo {{ item }}"
   changed_when: false
   ignore_errors: yes
   loop: "{{ kernel_autostart_modules | default([], true) }}"
 
 # Can check only if the value was specified
 - name: Check if sysctl information is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - item.name is defined
       - item.name is string
@@ -35,14 +35,14 @@
 
 #kernel_sysctl_flush_network_routes
 - name: Check if kernel_sysctl_flush_network_routes is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_sysctl_flush_network_routes is defined
       - kernel_sysctl_flush_network_routes | type_debug == 'bool'
     quiet: yes
 
 - name: Ensure kernel_udev_sata_link_power_mgmt value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_sata_link_power_mgmt is string
       - kernel_udev_sata_link_power_mgmt in ['min_power', 'max_performance', 'medium_power', 'med_power_with_dipm']
@@ -50,49 +50,49 @@
   when: kernel_udev_sata_link_power_mgmt is defined
 
 - name: Ensure kernel_udev_disable_bluetooth value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_disable_bluetooth | type_debug=='bool'
     quiet: yes
   when: kernel_udev_disable_bluetooth is defined
 
 - name: Ensure kernel_udev_disable_wake_on_lan value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_disable_wake_on_lan | type_debug=='bool'
     quiet: yes
   when: kernel_udev_disable_wake_on_lan is defined
 
 - name: Ensure kernel_udev_usb_autosuspend_devices is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_usb_autosuspend_devices is iterable
     quiet: yes
   when: kernel_udev_usb_autosuspend_devices is defined
 
 - name: Ensure kernel_udev_pci_autosuspend_devices is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_pci_autosuspend_devices is iterable
     quiet: yes
   when: kernel_udev_pci_autosuspend_devices is defined
 
 - name: Ensure kernel_udev_enable_wlan_powersave value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_enable_wlan_powersave | type_debug=='bool'
     quiet: yes
   when: kernel_udev_enable_wlan_powersave is defined
 
 - name: Ensure kernel_udev_autosuspend_ahci_devices value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_autosuspend_ahci_devices | type_debug=='bool'
     quiet: yes
   when: kernel_udev_autosuspend_ahci_devices is defined
 
 - name: Ensure kernel_udev_autosuspend_scsi_devices value is valid
-  assert:
+  ansible.builtin.assert:
     that:
       - kernel_udev_autosuspend_scsi_devices | type_debug=='bool'
     quiet: yes
