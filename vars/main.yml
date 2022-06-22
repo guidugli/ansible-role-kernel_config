@@ -1,8 +1,6 @@
 ---
 # vars file for kernel_config
 
-kernel_udev_reload_cmd: "udevadm control --reload-rules && udevadm trigger"
-
 _kernel_procps_packages:
   default: ['procps']
   RedHat: ['procps-ng']
