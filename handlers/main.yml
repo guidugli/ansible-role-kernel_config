@@ -2,7 +2,7 @@
 # handlers file for sysctl
 
 - name: Flush network routes
-  ansible.builtin.sysctl:
+  ansible.posix.sysctl:
     name: "{{ item }}"
     value: "1"
     reload: yes

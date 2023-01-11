@@ -65,7 +65,7 @@
   # split this into two tasks, one for network keys and other
   # for non-network keys.
 - name: Checking sysctl configuration
-  ansible.builtin.sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
     state: present
