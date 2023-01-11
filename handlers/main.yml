@@ -1,7 +1,7 @@
 ---
 # handlers file for sysctl
 
-- name: flush network routes
+- name: Flush network routes
   ansible.builtin.sysctl:
     name: "{{ item }}"
     value: "1"
@@ -15,7 +15,7 @@
     - kernel_sysctl_flush_network_routes
     - ansible_virtualization_type not in _container_types
 
-- name: reload modules
+- name: Reload modules
   ansible.builtin.systemd:
     name: systemd-modules-load.service
     state: restarted
@@ -23,6 +23,6 @@
     - ansible_service_mgr == 'systemd'
     - ansible_virtualization_type not in _container_types
 
-- name: reload udev
+- name: Reload udev
   ansible.builtin.shell: "udevadm control --reload-rules && udevadm trigger"
   when: ansible_virtualization_type not in _container_types

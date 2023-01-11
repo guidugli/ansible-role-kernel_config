@@ -15,7 +15,7 @@
     group: root
     mode: '0644'
   loop: "{{ kernel_disable_modules | default([]) }}"
-  notify: reload modules
+  notify: Reload modules
 
 - name: Add files on /etc/modprobe.d to blacklist modules
   ansible.builtin.lineinfile:
@@ -28,7 +28,7 @@
     group: root
     mode: '0644'
   loop: "{{ kernel_blacklist_modules | default([]) }}"
-  notify: reload modules
+  notify: Reload modules
 
 - name: Add files on /etc/modules-load.d to autostart modules
   ansible.builtin.lineinfile:
@@ -41,7 +41,7 @@
     group: root
     mode: '0644'
   loop: "{{ kernel_autostart_modules | default([]) }}"
-  notify: reload modules
+  notify: Reload modules
 
 - name: Install sysctl package (apt package manager)
   ansible.builtin.apt:
@@ -73,7 +73,7 @@
     reload: yes
     sysctl_set: yes
   loop: "{{ kernel_sysctl | default([]) }}"
-  notify: flush network routes
+  notify: Flush network routes
 
 - name: Perform udev operations
   ansible.builtin.import_tasks: udev.yml

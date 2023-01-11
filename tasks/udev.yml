@@ -16,4 +16,4 @@
     - 90-pci-autosuspend
     - 90-ahci-ata-autosuspend
     - 90-scsi-autosuspend
-  notify: reload udev
+  notify: Reload udev
