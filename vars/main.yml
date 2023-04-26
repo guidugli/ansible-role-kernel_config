@@ -4,6 +4,7 @@
 _kernel_procps_packages:
   default: ['procps']
   RedHat: ['procps-ng']
+  Rocky: ['procps-ng']
   CentOS: ['procps-ng']
   Fedora: ['procps-ng']
   Archlinux: ['procps-ng']
