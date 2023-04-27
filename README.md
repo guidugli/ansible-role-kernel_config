@@ -15,22 +15,51 @@ Role Variables
 
 **Available variables are listed below, along with default values (see `defaults/main.yml`):**
 
-    #kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'vfat', 'squashfs']
+    kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'squashfs',
+                             'dccp', 'sctp', 'rds', 'tipc']
 
-Use the variable below to list the kernel modules that should be disabled you might add usb-storage to the list but this will prevent any usb storage device from working. Consider using USBGuard.
+Use this variable to list the kernel modules that should be disabled you might add usb-storage to the list but this will prevent any usb storage device from working. Consider using USBGuard. The default values will work on most systems. If the system needs to use some of these modules, overwrite this variable with the desired configuration.
 
-    #kernel_blacklist_modules: ['radeon', 'amdgpu']
+    kernel_blacklist_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'squashfs',
+                               'dccp', 'sctp', 'rds', 'tipc']
 
-Modules to be blacklisted.
+Modules to be blacklisted. The default values will work on most systems. If the system needs to use some of these modules, overwrite this variable with the desired configuration.
 
     #kernel_autostart_modules: ['br_netfilter']
 
 Modules to be autostarted.
 
-    #kernel_sysctl:
-    #  - { name: fs.suid_dumpable, value: "0" }
+    kernel_sysctl:
+  - { name: fs.suid_dumpable, value: "0" } 
+  - { name: fs.protected_hardlinks, value: "1" } 
+  - { name: fs.protected_symlinks, value: "1" } 
+  - { name: fs.inotify.max_user_instances, value: "1024" } 
+  - { name: kernel.dmesg_restrict, value: "1" } 
+  - { name: kernel.yama.ptrace_scope, value: "1" } 
+  - { name: kernel.randomize_va_space, value: "2" } 
+  - { name: kernel.kptr_restrict, value: "1" } 
+  - { name: kernel.nmi_watchdog, value: "0" } 
+  - { name: net.ipv4.ip_forward, value: "0" } 
+  - { name: net.ipv4.conf.all.forwarding, value: "0" } 
+  - { name: net.ipv4.conf.all.send_redirects, value: "0" } 
+  - { name: net.ipv4.conf.default.send_redirects, value: "0" } 
+  - { name: net.ipv4.conf.all.accept_source_route, value: "0" } 
+  - { name: net.ipv4.conf.default.accept_source_route, value: "0" } 
+  - { name: net.ipv4.conf.all.accept_redirects, value: "0" } 
+  - { name: net.ipv4.conf.default.accept_redirects, value: "0" } 
+  - { name: net.ipv4.conf.all.secure_redirects, value: "0" } 
+  - { name: net.ipv4.conf.default.secure_redirects, value: "0" } 
+  - { name: net.ipv4.conf.all.log_martians, value: "1" } 
+  - { name: net.ipv4.conf.default.log_martians, value: "1" } 
+  - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: "1" } 
+  - { name: net.ipv4.icmp_ignore_bogus_error_responses, value: "1" }
+  - { name: net.ipv4.conf.all.rp_filter, value: "1" }
+  - { name: net.ipv4.conf.default.rp_filter, value: "1" }
+  - { name: net.ipv4.tcp_syncookies, value: "1" }
+  - { name: net.ipv6.conf.all.disable_ipv6, value: "1" }
+  - { name: net.ipv6.conf.default.disable_ipv6, value: "1" }
 
-Specify sysctl parameters to be configured on the system.
+Specify sysctl parameters to be configured on the system. The default configuration is valid for systems that do not act as routers and that do not use IPv6. Check the rules and overwrite this variable if needed.
 
     kernel_sysctl_flush_network_routes: yes
 
