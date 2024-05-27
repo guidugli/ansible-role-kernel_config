@@ -12,23 +12,24 @@ name: CI
   schedule:
     - cron: "0 5 * * 0"
 
-defaults:
-  run:
-    working-directory: 'guidugli.kernel_config'
-
 jobs:
 
   lint:
     name: Lint
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ vars.WORKING_DIR }}
+    environment: production
     runs-on: ubuntu-20.04
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          path: 'guidugli.kernel_config'
+          path: ${{ vars.WORKING_DIR }}
 
       - name: Set up Python 3.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -40,6 +41,11 @@ jobs:
           yamllint .
   molecule:
     name: Molecule
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ vars.WORKING_DIR }}
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -50,18 +56,17 @@ jobs:
           - ubuntu2004
           - debian12
           - debian11
-          - debian10
           - fedora40
           - fedora39
 
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          path: 'guidugli.kernel_config'
+          path: ${{ vars.WORKING_DIR }}
 
       - name: Set up Python 3.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
