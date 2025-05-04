@@ -54,7 +54,7 @@
   ansible.builtin.yum:
     state: latest
     name: "{{ kernel_procps_packages }}"
-  when: ansible_pkg_mgr in ['yum', 'dnf']
+  when: ansible_pkg_mgr in ['yum', 'dnf', 'dnf5']
 
 
 - name: Force module reload before running sysctl
