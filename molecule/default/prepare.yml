@@ -3,7 +3,6 @@
   hosts: all
   tasks:
 
-
     - name: Update Ubuntu/Debian systems
       ansible.builtin.apt:
 #        upgrade: dist
@@ -25,4 +24,3 @@
           - vim
           - udev
         state: latest
-
