@@ -1,7 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  become: yes
   vars:
     kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'vfat', 'squashfs']
     kernel_blacklist_modules: ['radeon', 'amdgpu']
@@ -30,29 +29,6 @@
       - { name: net.ipv6.conf.all.accept_ra, value: "0" }
       - { name: net.ipv6.conf.default.accept_ra, value: "0" }
     kernel_sysctl_flush_network_routes: yes
-
-  pre_tasks:
-    - name: Install missing RedHat container packages
-      ansible.builtin.yum:
-        state: latest
-        name:
-          - procps-ng
-      when: ansible_pkg_mgr in ['yum', 'dnf']
-
-    - name: Update Ubuntu/Debian systems
-      ansible.builtin.apt:
-#        upgrade: dist
-        update_cache: true
-        cache_valid_time: 3600
-      when: ansible_pkg_mgr == "apt"
-
-    - name: Make sure some packages are installed
-      ansible.builtin.package:
-        name:
-          - sudo
-          - vim
-          - udev
-        state: latest
 
   roles:
     - guidugli.kernel_config
