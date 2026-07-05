@@ -1,30 +1,35 @@
 ---
-dependencies: []
 
+# Generated file. Do not edit directly.
+# Source template: meta_main.yml.j2
+dependencies: []
 galaxy_info:
   role_name: kernel_config
+  namespace: guidugli
   author: guidugli
-  description: Disable kernel modules and configure sysctl settings on linux
   company: Creuzo Tech
-  license: "license (BSD, MIT)"
-  min_ansible_version: '2.9'
-
+  description: >-
+    Configure Linux kernel modules, sysctl parameters, and related udev power-management rules
+    while keeping release metadata aligned with the shared Molecule platform matrix.
+  license: MIT
+  min_ansible_version: '2.14'
   platforms:
     - name: Fedora
       versions:
-        - '43'
-        - '42'
+        - "all"
     - name: Ubuntu
       versions:
-        - noble
-        - jammy
+        - "resolute"
+        - "noble"
     - name: Debian
       versions:
-        - trixie
-        - bookworm
-
+        - "trixie"
+        - "bookworm"
   galaxy_tags:
-    - module
     - kernel
-    - disable
     - sysctl
+    - linux
+    - security
+    - hardening
+    - udev
+    - modules

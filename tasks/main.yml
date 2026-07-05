@@ -1,81 +1,110 @@
 ---
-# tasks file for sysctl
-
-- name: Execute role tasks
+- name: Execute kernel_config role tasks
+  tags:
+    - kernel_config
   block:
-
-    - name: Validate provided variables and set os dependent variables
+    - name: Validate provided variables and set OS-dependent variables
       ansible.builtin.import_tasks: asserts.yml
+      tags:
+        - kernel_config
+        - validate
 
-    - name: Add files on /etc/modprobe.d to disable modules
+    - name: Disable selected kernel modules via modprobe configuration
       ansible.builtin.lineinfile:
-        path: "/etc/modprobe.d/{{ item }}-disabled.conf"
+        path: /etc/modprobe.d/{{ item }}-disabled.conf
         regexp: '^\s*install\s+{{ item }}\s+/bin/true'
-        line: "install {{ item }} /bin/true"
+        line: install {{ item }} /bin/true
         state: present
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
       loop: "{{ kernel_disable_modules | default([]) }}"
       notify: Reload modules
+      tags:
+        - kernel_config
+        - config
 
-    - name: Add files on /etc/modprobe.d to blacklist modules
+    - name: Blacklist selected kernel modules via modprobe configuration
       ansible.builtin.lineinfile:
-        path: "/etc/modprobe.d/{{ item }}-blacklist.conf"
+        path: /etc/modprobe.d/{{ item }}-blacklist.conf
         regexp: '^\s*blacklist\s+{{ item }}'
-        line: "blacklist {{ item }}"
+        line: blacklist {{ item }}
         state: present
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
       loop: "{{ kernel_blacklist_modules | default([]) }}"
       notify: Reload modules
+      tags:
+        - kernel_config
+        - config
 
-    - name: Add files on /etc/modules-load.d to autostart modules
+    - name: Autostart selected kernel modules via modules-load configuration
       ansible.builtin.lineinfile:
-        path: "/etc/modules-load.d/{{ item }}.conf"
+        path: /etc/modules-load.d/{{ item }}.conf
         regexp: '^\s*{{ item }}'
-        line: "{{ item }}"
+        line: '{{ item }}'
         state: present
-        create: yes
+        create: true
         owner: root
         group: root
         mode: '0644'
       loop: "{{ kernel_autostart_modules | default([]) }}"
       notify: Reload modules
+      tags:
+        - kernel_config
+        - config
 
-    - name: Install sysctl package (apt package manager)
+    - name: Refresh apt cache
       ansible.builtin.apt:
-        name: "{{ kernel_procps_packages }}"
         update_cache: true
-        cache_valid_time: 3600
-      when: ansible_pkg_mgr == "apt"
+      when: ansible_facts['pkg_mgr'] == 'apt'
+      tags:
+        - kernel_config
+        - install
 
-    - name: Install sysctl package (yum/dnf package manager)
-      ansible.builtin.dnf:
-        state: latest
-        name: "{{ kernel_procps_packages }}"
-      when: ansible_pkg_mgr in ['yum', 'dnf', 'dnf5']
-
-    - name: Force module reload before running sysctl
-      ansible.builtin.meta: flush_handlers
-
-      # Most items are related to network, so call notify flush
-      # network routes in case of any change. Maybe in the future
-      # split this into two tasks, one for network keys and other
-      # for non-network keys.
-    - name: Checking sysctl configuration
-      ansible.posix.sysctl:
-        name: "{{ item.name }}"
-        value: "{{ item.value }}"
+    - name: Install procps package on apt-based systems
+      ansible.builtin.apt:
+        name: '{{ kernel_procps_packages }}'
         state: present
-        ignoreerrors: no
-        reload: yes
-        sysctl_set: yes
+      when: ansible_facts['pkg_mgr'] == 'apt'
+      tags:
+        - kernel_config
+        - install
+
+    - name: Install procps package on rpm-based systems
+      ansible.builtin.dnf:
+        name: '{{ kernel_procps_packages }}'
+        state: present
+      when: ansible_facts['pkg_mgr'] in ['yum', 'dnf', 'dnf5']
+      tags:
+        - kernel_config
+        - install
+
+    - name: Force module reload before running sysctl tasks
+      ansible.builtin.meta: flush_handlers
+      tags:
+        - kernel_config
+        - service
+
+    - name: Configure sysctl parameters
+      ansible.posix.sysctl:
+        name: '{{ item.name }}'
+        value: '{{ item.value }}'
+        state: present
+        ignoreerrors: false
+        reload: true
+        sysctl_set: true
       loop: "{{ kernel_sysctl | default([]) }}"
       notify: Flush network routes
+      tags:
+        - kernel_config
+        - config
 
     - name: Perform udev operations
       ansible.builtin.import_tasks: udev.yml
+      tags:
+        - kernel_config
+        - config

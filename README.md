@@ -1,153 +1,153 @@
-Ansible Role: kernel_config
-=========
+[![CI](https://github.com/guidugli/ansible-role-kernel_config/actions/workflows/CI.yml/badge.svg)](https://github.com/guidugli/ansible-role-kernel_config/actions/workflows/CI.yml)
+[![Release](https://img.shields.io/github/v/release/guidugli/ansible-role-kernel_config?sort=semver)](https://github.com/guidugli/ansible-role-kernel_config/releases)
+[![Galaxy](https://img.shields.io/badge/galaxy-guidugli.kernel__config-blue)](https://galaxy.semaphoreui.com/views/guidugli/ansible-role-kernel_config/overview)
+[![License](https://img.shields.io/github/license/guidugli/ansible-role-kernel_config)](https://github.com/guidugli/ansible-role-kernel_config/blob/main/LICENSE)
 
-An Ansible Role that install and configure sysctl on RHEL/CentOS, Fedora and Debian/Ubuntu. This role also can disable, blacklist or set kernel modules to autostart. Also, can set UDEV rules related to power management. 
+# Ansible Role: kernel_config
 
-**NOTE:** Disbling kernel modules or settings devices to sleep (udev settings) may impact how the system works and may require system recovery (single user login or even live boot).
+Configure Linux kernel modules, sysctl parameters, and selected udev power-management rules.
+This role is aligned to the shared Molecule layout used by the template repository and keeps
+role-enforced privilege out of tasks and handlers.
 
-Requirements
-------------
+## Requirements
 
-Operating system running on bare metal or on a hypervisor virtualization. Depending on the settings, this role may not work properly on conteinerized systems.
+- Supported by the repository metadata template for Fedora, Ubuntu, and Debian platform matrices.
+- Requires the collections declared in `requirements.yml`.
+- Intended for Linux hosts; some sysctl and service actions are constrained in containers.
 
-Role Variables
---------------
+## Variables
 
-**Available variables are listed below, along with default values (see `defaults/main.yml`):**
+Variables with defaults from `defaults/main.yml`:
 
-    kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'squashfs',
-                             'dccp', 'sctp', 'rds', 'tipc']
+```yaml
+kernel_disable_modules:
+  - cramfs
+  - freevxfs
+  - jjfs2
+  - hfs
+  - hfsplus
+  - udf
+  - squashfs
+  - dccp
+  - sctp
+  - rds
+  - tipc
 
-Use this variable to list the kernel modules that should be disabled you might add usb-storage to the list but this will prevent any usb storage device from working. Consider using USBGuard. The default values will work on most systems. If the system needs to use some of these modules, overwrite this variable with the desired configuration.
+kernel_blacklist_modules:
+  - cramfs
+  - freevxfs
+  - jjfs2
+  - hfs
+  - hfsplus
+  - udf
+  - squashfs
+  - dccp
+  - sctp
+  - rds
+  - tipc
 
-    kernel_blacklist_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'squashfs',
-                               'dccp', 'sctp', 'rds', 'tipc']
+kernel_autostart_modules: []
 
-Modules to be blacklisted. The default values will work on most systems. If the system needs to use some of these modules, overwrite this variable with the desired configuration.
+kernel_sysctl:
+  - name: fs.suid_dumpable
+    value: '0'
+  - name: fs.protected_hardlinks
+    value: '1'
+  - name: fs.protected_symlinks
+    value: '1'
+  - name: fs.inotify.max_user_instances
+    value: '1024'
+  - name: kernel.dmesg_restrict
+    value: '1'
+  - name: kernel.yama.ptrace_scope
+    value: '1'
+  - name: kernel.randomize_va_space
+    value: '2'
+  - name: kernel.kptr_restrict
+    value: '1'
+  - name: kernel.nmi_watchdog
+    value: '0'
+  - name: net.ipv4.ip_forward
+    value: '0'
+  - name: net.ipv4.conf.all.forwarding
+    value: '0'
+  - name: net.ipv4.conf.all.send_redirects
+    value: '0'
+  - name: net.ipv4.conf.default.send_redirects
+    value: '0'
+  - name: net.ipv4.conf.all.accept_source_route
+    value: '0'
+  - name: net.ipv4.conf.default.accept_source_route
+    value: '0'
+  - name: net.ipv4.conf.all.accept_redirects
+    value: '0'
+  - name: net.ipv4.conf.default.accept_redirects
+    value: '0'
+  - name: net.ipv4.conf.all.secure_redirects
+    value: '0'
+  - name: net.ipv4.conf.default.secure_redirects
+    value: '0'
+  - name: net.ipv4.conf.all.log_martians
+    value: '1'
+  - name: net.ipv4.conf.default.log_martians
+    value: '1'
+  - name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: '1'
+  - name: net.ipv4.icmp_ignore_bogus_error_responses
+    value: '1'
+  - name: net.ipv4.conf.all.rp_filter
+    value: '1'
+  - name: net.ipv4.conf.default.rp_filter
+    value: '1'
+  - name: net.ipv4.tcp_syncookies
+    value: '1'
+  - name: net.ipv6.conf.all.disable_ipv6
+    value: '1'
+  - name: net.ipv6.conf.default.disable_ipv6
+    value: '1'
 
-    #kernel_autostart_modules: ['br_netfilter']
+kernel_sysctl_flush_network_routes: true
+```
 
-Modules to be autostarted.
+Additional optional udev variables are validated when defined in inventory or playbook vars:
+`kernel_udev_sata_link_power_mgmt`, `kernel_udev_disable_bluetooth`,
+`kernel_udev_disable_wake_on_lan`, `kernel_udev_usb_autosuspend_devices`,
+`kernel_udev_pci_autosuspend_devices`, `kernel_udev_enable_wlan_powersave`,
+`kernel_udev_autosuspend_ahci_devices`, and `kernel_udev_autosuspend_scsi_devices`.
 
-    kernel_sysctl:
-  - { name: fs.suid_dumpable, value: "0" } 
-  - { name: fs.protected_hardlinks, value: "1" } 
-  - { name: fs.protected_symlinks, value: "1" } 
-  - { name: fs.inotify.max_user_instances, value: "1024" } 
-  - { name: kernel.dmesg_restrict, value: "1" } 
-  - { name: kernel.yama.ptrace_scope, value: "1" } 
-  - { name: kernel.randomize_va_space, value: "2" } 
-  - { name: kernel.kptr_restrict, value: "1" } 
-  - { name: kernel.nmi_watchdog, value: "0" } 
-  - { name: net.ipv4.ip_forward, value: "0" } 
-  - { name: net.ipv4.conf.all.forwarding, value: "0" } 
-  - { name: net.ipv4.conf.all.send_redirects, value: "0" } 
-  - { name: net.ipv4.conf.default.send_redirects, value: "0" } 
-  - { name: net.ipv4.conf.all.accept_source_route, value: "0" } 
-  - { name: net.ipv4.conf.default.accept_source_route, value: "0" } 
-  - { name: net.ipv4.conf.all.accept_redirects, value: "0" } 
-  - { name: net.ipv4.conf.default.accept_redirects, value: "0" } 
-  - { name: net.ipv4.conf.all.secure_redirects, value: "0" } 
-  - { name: net.ipv4.conf.default.secure_redirects, value: "0" } 
-  - { name: net.ipv4.conf.all.log_martians, value: "1" } 
-  - { name: net.ipv4.conf.default.log_martians, value: "1" } 
-  - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: "1" } 
-  - { name: net.ipv4.icmp_ignore_bogus_error_responses, value: "1" }
-  - { name: net.ipv4.conf.all.rp_filter, value: "1" }
-  - { name: net.ipv4.conf.default.rp_filter, value: "1" }
-  - { name: net.ipv4.tcp_syncookies, value: "1" }
-  - { name: net.ipv6.conf.all.disable_ipv6, value: "1" }
-  - { name: net.ipv6.conf.default.disable_ipv6, value: "1" }
+## Example playbook
 
-Specify sysctl parameters to be configured on the system. The default configuration is valid for systems that do not act as routers and that do not use IPv6. Check the rules and overwrite this variable if needed.
-
-    kernel_sysctl_flush_network_routes: yes
-
-If set to yes, it will set net.ipv4.route.flush and net.ipv6.route.flush settings to 1 and reload.
-
-    #kernel_udev_sata_link_power_mgmt: med_power_with_dipm
-
-SATA Link power management policy. Valid values are min_power, max_performance, medium_power, med_power_with_dipm.
-
-    #kernel_udev_autosuspend_ahci_devices: yes
-
-Autosuspend AHCI controllers and ATA devices.
-
-    #kernel_udev_autosuspend_scsi_devices: yes
-
-Autosuspend scsi devices, driver=sd.
-
-    #kernel_udev_disable_bluetooth: no
-
-Disable Bluetooth.
-
-    #kernel_udev_disable_wake_on_lan: yes
-
-Disable wake on lan.
-
-    #kernel_udev_usb_autosuspend_devices:
-    #  - { vendor: '13fe', product: '5500' }   # Silicon power flash drive
-    #  - { vendor: '1532', product: '0f13', autosuspend: 120 }    # Keyboard
-
-List of devices to autosuspend.
-Usually linux already set autosuspend for usb hubs and other devices, so do not need to use this option for those. Check which devices are set to auto or not looking at /sys/bus/usb/devices/*/power/control.
-
-    #kernel_udev_pci_autosuspend_devices:
-    #  - { vendor: '0x8086', device: '0x0c00' }
-    #  - { vendor: '0x8086', device: '0x0412' }
-
-List of pci devices to autosuspend.
-
-    #kernel_udev_enable_wlan_powersave: yes
-
-Enable wlan power save?
-
-**The variables listed below do not need to be changed for targeted systems (see `vars/main.yml`):**
-
-    kernel_udev_reload_cmd: "udevadm control --reload-rules && udevadm trigger"
-
-Command to reload udev rules.
-
-Dependencies
-------------
-
-No dependencies.
-
-Example Playbook
-----------------
-
-    - hosts: servers
+```yaml
+---
+- name: Configure kernel settings
+  hosts: all
+  become: true
+  roles:
+    - role: guidugli.kernel_config
       vars:
-        kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'vfat', 'squashfs']
-        kernel_blacklist_modules: ['radeon', 'amdgpu']
+        kernel_disable_modules:
+          - usb-storage
+        kernel_blacklist_modules:
+          - firewire-core
+        kernel_autostart_modules:
+          - br_netfilter
         kernel_sysctl:
-          - { name: net.ipv4.conf.all.forwarding, value: "0" }
-          - { name: net.ipv4.conf.all.send_redirects, value: "0" }
-          - { name: net.ipv4.conf.default.send_redirects, value: "0" }
-          - { name: net.ipv4.conf.all.accept_source_route, value: "0" }
-          - { name: net.ipv4.conf.default.accept_source_route, value: "0" }
-          - { name: net.ipv4.conf.all.accept_redirects, value: "0" }
-          - { name: net.ipv4.conf.default.accept_redirects, value: "0" }
-          - { name: net.ipv4.conf.all.secure_redirects, value: "0" }
-          - { name: net.ipv4.conf.default.secure_redirects, value: "0" }
-          - { name: net.ipv4.conf.all.log_martians, value: "1" }
-          - { name: net.ipv4.conf.default.log_martians, value: "1" }
-          - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: "1" }
-          - { name: net.ipv4.icmp_ignore_bogus_error_responses, value: "1" }
-          - { name: net.ipv4.conf.all.rp_filter, value: "1" }
-          - { name: net.ipv4.conf.default.rp_filter, value: "1" }
-          - { name: net.ipv4.tcp_syncookies, value: "1" }
-        kernel_sysctl_flush_network_routes: yes
+          - name: net.ipv4.ip_forward
+            value: '0'
+          - name: net.ipv4.tcp_syncookies
+            value: '1'
+```
 
-      roles:
-         - { role: guidugli.kernel_config }
+## Molecule testing
 
-License
--------
+- `molecule/default` and `molecule/systemd` remain generator-controlled.
+- Shared converge and verify logic live in `molecule/shared/`.
+- Run `molecule test -s default` for the fast container scenario.
+- Run `molecule test -s systemd` when you need to exercise the systemd-capable scenario.
 
-MIT / BSD
+## Execution notes
 
-Author Information
-------------------
-
-This role was created in 2020 by Carlos Guidugli.
+- **Privilege model:** the role never sets `become`; use `become: true` from the calling playbook for real hosts that require privileged writes under `/etc`, package installation, sysctl changes, and service reloads.
+- **Containers:** handlers already skip module reloads, route flushes, and udev reloads inside known container runtimes. Some sysctl names can still be restricted by the container runtime or kernel.
+- **Systemd:** the module reload handler restarts `systemd-modules-load.service` only when `ansible_facts['service_mgr'] == 'systemd'`.
+- **Behavioral caveat:** udev rule template behavior remains unchanged from the source role because only allowed modernization files were edited.

@@ -1,9 +1,8 @@
 ---
-
-- name: Ensure udev power saving rules are set
+- name: Ensure udev power-saving rule templates are present
   ansible.builtin.template:
-    src: "{{ item }}.rules.j2"
-    dest: "/etc/udev/rules.d/{{ item }}.rules"
+    src: '{{ item }}.rules.j2'
+    dest: /etc/udev/rules.d/{{ item }}.rules
     owner: root
     group: root
     mode: '0644'
@@ -17,3 +16,6 @@
     - 90-ahci-ata-autosuspend
     - 90-scsi-autosuspend
   notify: Reload udev
+  tags:
+    - kernel_config
+    - config

@@ -1,7 +1,7 @@
 ---
+
 # Generated file. Do not edit directly.
 # Source template: {{ template_name }}
-
 dependencies: []
 galaxy_info:
   role_name: kernel_config
@@ -9,7 +9,8 @@ galaxy_info:
   author: guidugli
   company: Creuzo Tech
   description: >-
-    TBD.
+    Configure Linux kernel modules, sysctl parameters, and related udev power-management rules
+    while keeping release metadata aligned with the shared Molecule platform matrix.
   license: MIT
   min_ansible_version: '2.14'
   platforms:
@@ -21,10 +22,10 @@ galaxy_info:
 {%   endfor %}
 {% endfor %}
   galaxy_tags:
+    - kernel
+    - sysctl
     - linux
     - security
-    - compliance
     - hardening
-    - logging
-    - cis
-    - monitoring
+    - udev
+    - modules

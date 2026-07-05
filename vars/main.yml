@@ -1,16 +1,32 @@
 ---
-# vars file for kernel_config
-
+# Internal variables for kernel_config.
 _kernel_procps_packages:
-  default: ['procps']
-  RedHat: ['procps-ng']
-  Rocky: ['procps-ng']
-  CentOS: ['procps-ng']
-  Fedora: ['procps-ng']
-  Archlinux: ['procps-ng']
+  default:
+    - procps
+    - udev
+  RedHat:
+    - procps-ng
+  Rocky:
+    - procps-ng
+  CentOS:
+    - procps-ng
+  Fedora:
+    - procps-ng
+  Archlinux:
+    - procps-ng
 
-kernel_procps_packages: "{{ _kernel_procps_packages[ansible_distribution ~'-'~ ansible_distribution_major_version] |
-                        default(_kernel_procps_packages[ansible_distribution]) |
-                        default(_kernel_procps_packages['default']) }}"
+kernel_procps_packages: >-
+  {{
+    _kernel_procps_packages[
+      ansible_facts['distribution'] ~ '-' ~ ansible_facts['distribution_major_version']
+    ]
+    | default(_kernel_procps_packages[ansible_facts['distribution']])
+    | default(_kernel_procps_packages['default'])
+  }}
 
-_container_types: ['docker', 'podman', 'lxc', 'containerd', 'container']
+_container_types:
+  - docker
+  - podman
+  - lxc
+  - containerd
+  - container

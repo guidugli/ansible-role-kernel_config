@@ -1,5 +1,71 @@
 ---
-- name: Verify audit role
+- name: Verify kernel_config role
   hosts: all
   gather_facts: true
   tasks:
+    - name: Check disabled module configuration files
+      ansible.builtin.stat:
+        path: /etc/modprobe.d/{{ item }}-disabled.conf
+      loop: "{{ kernel_disable_modules | default([]) }}"
+      register: kernel_disabled_module_stats
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Assert disabled module configuration files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        quiet: true
+      loop: "{{ kernel_disabled_module_stats.results }}"
+      loop_control:
+        label: "{{ item.stat.path | default(item.item) }}"
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Check blacklisted module configuration files
+      ansible.builtin.stat:
+        path: /etc/modprobe.d/{{ item }}-blacklist.conf
+      loop: "{{ kernel_blacklist_modules | default([]) }}"
+      register: kernel_blacklist_module_stats
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Assert blacklisted module configuration files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        quiet: true
+      loop: "{{ kernel_blacklist_module_stats.results }}"
+      loop_control:
+        label: "{{ item.stat.path | default(item.item) }}"
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Read configured sysctl values
+      ansible.builtin.command:
+        cmd: sysctl -n {{ item.name }}
+      changed_when: false
+      loop: "{{ kernel_sysctl | default([]) }}"
+      register: kernel_sysctl_values
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Assert sysctl values match requested configuration
+      ansible.builtin.assert:
+        that:
+          - (item.stdout | trim) == (item.item.value | string)
+        quiet: true
+      loop: "{{ kernel_sysctl_values.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+      when: not
+        (ansible_facts['virtualization_type'] in ['docker', 'podman', 'lxc', 'containerd', 'container'] and
+        item.item.name is match('^net\.ipv6\.'))
+      tags:
+        - kernel_config
+        - validate

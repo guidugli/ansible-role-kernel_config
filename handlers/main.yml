@@ -1,32 +1,48 @@
 ---
-# handlers file for sysctl
-
 - name: Flush network routes
-  become: yes
   ansible.posix.sysctl:
-    name: "{{ item }}"
-    value: "1"
-    reload: yes
+    name: '{{ item }}'
+    value: '1'
+    reload: true
     state: present
-    sysctl_set: yes
+    sysctl_set: true
   loop:
     - net.ipv4.route.flush
     - net.ipv6.route.flush
   when:
     - kernel_sysctl_flush_network_routes
-    - ansible_virtualization_type not in _container_types
+    - ansible_facts['virtualization_type'] not in _container_types
+  tags:
+    - kernel_config
+    - service
 
 - name: Reload modules
-  become: yes
   ansible.builtin.systemd:
     name: systemd-modules-load.service
     state: restarted
   when:
-    - ansible_service_mgr == 'systemd'
-    - ansible_virtualization_type not in _container_types
+    - ansible_facts['service_mgr'] == 'systemd'
+    - ansible_facts['virtualization_type'] not in _container_types
+  tags:
+    - kernel_config
+    - service
 
-- name: Reload udev
-  become: yes
-  ansible.builtin.shell: "udevadm control --reload-rules && udevadm trigger"
+- name: Reload udev rules
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules
   changed_when: true
-  when: ansible_virtualization_type not in _container_types
+  when: ansible_facts['virtualization_type'] not in _container_types
+  listen: Reload udev
+  tags:
+    - kernel_config
+    - service
+
+- name: Trigger udev
+  ansible.builtin.command:
+    cmd: udevadm trigger
+  changed_when: true
+  when: ansible_facts['virtualization_type'] not in _container_types
+  listen: Reload udev
+  tags:
+    - kernel_config
+    - service
