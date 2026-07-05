@@ -1,6 +1,8 @@
 ---
 - name: Converge
   hosts: all
+  gather_facts: true
+  become: false
   vars:
     kernel_disable_modules: ['cramfs', 'freevxfs', 'jjfs2', 'hfs', 'hfsplus', 'udf', 'vfat', 'squashfs']
     kernel_blacklist_modules: ['radeon', 'amdgpu']
@@ -29,6 +31,5 @@
       - { name: net.ipv6.conf.all.accept_ra, value: "0" }
       - { name: net.ipv6.conf.default.accept_ra, value: "0" }
     kernel_sysctl_flush_network_routes: yes
-
   roles:
-    - guidugli.kernel_config
+    - role: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}"

@@ -33,7 +33,7 @@
     msg: "Both name and value should be defined."
   loop: "{{ kernel_sysctl | default([], true) }}"
 
-#kernel_sysctl_flush_network_routes
+# kernel_sysctl_flush_network_routes
 - name: Check if kernel_sysctl_flush_network_routes is valid
   ansible.builtin.assert:
     that:
