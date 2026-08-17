@@ -1,11 +1,8 @@
 ---
 - name: Flush network routes
-  ansible.posix.sysctl:
-    name: '{{ item }}'
-    value: '1'
-    reload: true
-    state: present
-    sysctl_set: true
+  ansible.builtin.command:
+    cmd: sysctl -w {{ item }}=1
+  changed_when: true
   loop:
     - net.ipv4.route.flush
     - net.ipv6.route.flush

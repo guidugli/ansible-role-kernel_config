@@ -2,5 +2,3 @@
 collections:
   - name: containers.podman
     version: '>=1.10.0'
-  - name: ansible.posix
-    version: '>=1.5.4'

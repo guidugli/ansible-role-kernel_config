@@ -45,27 +45,48 @@
         - kernel_config
         - validate
 
-    - name: Read configured sysctl values
+    - name: Read role-managed sysctl drop-in
+      ansible.builtin.slurp:
+        src: /etc/sysctl.d/99-kernel_config.conf
+      register: kernel_sysctl_dropin
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Assert sysctl values are persisted in role-managed drop-in
+      ansible.builtin.assert:
+        that:
+          - >-
+            (item.name ~ ' = ' ~ (item.value | string)) in
+            (kernel_sysctl_dropin.content | b64decode).splitlines()
+        quiet: true
+      loop: "{{ kernel_sysctl | default([]) }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Read configured sysctl runtime values on non-container hosts
       ansible.builtin.command:
         cmd: sysctl -n {{ item.name }}
       changed_when: false
       loop: "{{ kernel_sysctl | default([]) }}"
       register: kernel_sysctl_values
+      when: ansible_facts['virtualization_type'] not in ['docker', 'podman', 'lxc', 'containerd', 'container']
       tags:
         - kernel_config
         - validate
 
-    - name: Assert sysctl values match requested configuration
+    - name: Assert sysctl runtime values match requested configuration on non-container hosts
       ansible.builtin.assert:
         that:
           - (item.stdout | trim) == (item.item.value | string)
         quiet: true
-      loop: "{{ kernel_sysctl_values.results }}"
+      loop: "{{ kernel_sysctl_values.results | default([]) }}"
       loop_control:
         label: "{{ item.item.name }}"
-      when: not
-        (ansible_facts['virtualization_type'] in ['docker', 'podman', 'lxc', 'containerd', 'container'] and
-        item.item.name is match('^net\.ipv6\.'))
+      when: ansible_facts['virtualization_type'] not in ['docker', 'podman', 'lxc', 'containerd', 'container']
       tags:
         - kernel_config
         - validate

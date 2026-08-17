@@ -2,6 +2,7 @@
 - name: Execute kernel_config role tasks
   tags:
     - kernel_config
+    - config
   block:
     - name: Validate provided variables and set OS-dependent variables
       ansible.builtin.import_tasks: asserts.yml
@@ -57,10 +58,37 @@
         - kernel_config
         - config
 
-    - name: Refresh apt cache
+    - name: Check apt package index directory
+      ansible.builtin.stat:
+        path: /var/lib/apt/lists
+      register: kernel_apt_lists_dir
+      when: ansible_facts['pkg_mgr'] == 'apt'
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Find apt package index files
+      ansible.builtin.find:
+        paths: /var/lib/apt/lists
+        file_type: file
+        excludes:
+          - lock
+      register: kernel_apt_index_files
+      when:
+        - ansible_facts['pkg_mgr'] == 'apt'
+        - kernel_apt_lists_dir.stat.exists | default(false)
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Refresh apt cache when package indexes are missing
       ansible.builtin.apt:
         update_cache: true
-      when: ansible_facts['pkg_mgr'] == 'apt'
+      when:
+        - ansible_facts['pkg_mgr'] == 'apt'
+        - >-
+          not (kernel_apt_lists_dir.stat.exists | default(false)) or
+          (kernel_apt_index_files.matched | default(0) | int) == 0
       tags:
         - kernel_config
         - install
@@ -69,6 +97,8 @@
       ansible.builtin.apt:
         name: '{{ kernel_procps_packages }}'
         state: present
+        update_cache: true
+        cache_valid_time: 3600
       when: ansible_facts['pkg_mgr'] == 'apt'
       tags:
         - kernel_config
@@ -89,15 +119,54 @@
         - kernel_config
         - service
 
-    - name: Configure sysctl parameters
-      ansible.posix.sysctl:
-        name: '{{ item.name }}'
-        value: '{{ item.value }}'
+    - name: Ensure sysctl drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/sysctl.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+      tags:
+        - kernel_config
+        - config
+
+    - name: Persist sysctl parameters in role-managed drop-in
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.d/99-kernel_config.conf
+        regexp: '^\s*{{ item.name | regex_escape }}\s*='
+        line: '{{ item.name }} = {{ item.value }}'
         state: present
-        ignoreerrors: false
-        reload: true
-        sysctl_set: true
+        create: true
+        owner: root
+        group: root
+        mode: '0644'
       loop: "{{ kernel_sysctl | default([]) }}"
+      tags:
+        - kernel_config
+        - config
+
+    - name: Read current sysctl parameter values on non-container hosts
+      ansible.builtin.command:
+        cmd: sysctl -n {{ item.name }}
+      changed_when: false
+      failed_when: false
+      register: kernel_sysctl_current_values
+      loop: "{{ kernel_sysctl | default([]) }}"
+      when: ansible_facts['virtualization_type'] not in _container_types
+      tags:
+        - kernel_config
+        - validate
+
+    - name: Apply changed sysctl runtime values on non-container hosts
+      ansible.builtin.command:
+        cmd: sysctl -w {{ item.item.name }}={{ item.item.value }}
+      changed_when: true
+      loop: "{{ kernel_sysctl_current_values.results | default([]) }}"
+      when:
+        - item.skipped is not defined
+        - >-
+          item.rc != 0 or
+          (item.stdout | trim) != (item.item.value | string)
       notify: Flush network routes
       tags:
         - kernel_config
