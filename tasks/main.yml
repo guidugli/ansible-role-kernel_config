@@ -132,7 +132,7 @@
 
     - name: Persist sysctl parameters in role-managed drop-in
       ansible.builtin.lineinfile:
-        path: /etc/sysctl.d/99-kernel_config.conf
+        path: "/etc/sysctl.d/{{ kernel_sysctl_filename }}"
         regexp: '^\s*{{ item.name | regex_escape }}\s*='
         line: '{{ item.name }} = {{ item.value }}'
         state: present

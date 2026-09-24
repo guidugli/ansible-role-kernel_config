@@ -28,6 +28,7 @@ kernel_blacklist_modules:
 
 kernel_autostart_modules: []
 
+kernel_sysctl_filename: 99-kernel_config.conf
 kernel_sysctl:
   - name: fs.suid_dumpable
     value: '0'

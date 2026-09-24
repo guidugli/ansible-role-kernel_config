@@ -48,6 +48,7 @@ All role inputs with defaults are defined in `defaults/main.yml` and validated i
 | `kernel_blacklist_modules` | list of strings | `cramfs`, `freevxfs`, `jjfs2`, `hfs`, `hfsplus`, `udf`, `squashfs`, `dccp`, `sctp`, `rds`, `tipc` | Modules for which the role creates `/etc/modprobe.d/<module>-blacklist.conf` with `blacklist <module>`. Use this for normal module blacklist policy. |
 | `kernel_autostart_modules` | list of strings | `[]` | Modules to load at startup through `/etc/modules-load.d/<module>.conf`. Leave empty when no startup-loaded modules are required. |
 | `kernel_sysctl` | list of dictionaries | See default sysctl table below | Persistent sysctl policy. Each item requires `name` and `value`. The role writes these values to `/etc/sysctl.d/99-kernel_config.conf`; on non-container hosts it also applies runtime values if they differ. |
+| `kernel_sysctl_filename` | name of the file to contain sysctl policies | 99-kernel_config.conf | Sets the file name to be created under /etc/sysctl.d that will contain the sysctl policies |
 | `kernel_sysctl_flush_network_routes` | boolean | `true` | When runtime sysctl values change on non-container hosts, this notifies the route-flush handler for `net.ipv4.route.flush` and `net.ipv6.route.flush`. |
 
 ### Default sysctl policy
